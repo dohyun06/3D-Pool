@@ -38,7 +38,9 @@ export class Sphere {
     this.x = -40;
     this.y = 0;
     this.signX = Math.sign(Math.cos(this.angle));
+    this.signX = this.signX ? this.signX : 1;
     this.signY = Math.sign(Math.sin(this.angle));
+    this.signY = this.signY ? this.signY : 1;
     this.v = 80 / 60;
     this.a = this.na;
     this.vx = Math.abs(this.v * Math.cos(this.angle));
@@ -53,6 +55,11 @@ export class Sphere {
   }
 
   draw(ctx, scale) {
+    if (this.vx !== 0 && this.vy !== 0) {
+      this.ax = Math.abs((this.a * this.vx) / (this.vx ** 2 + this.vy ** 2) ** 0.5);
+      this.ay = Math.abs((this.a * this.vy) / (this.vx ** 2 + this.vy ** 2) ** 0.5);
+    }
+
     this.vx -= this.ax;
     this.vy -= this.ay;
 
@@ -72,6 +79,8 @@ export class Sphere {
     this.boxCollision();
 
     const pos = this.coord(scale);
+
+    console.log(pos);
 
     ctx.beginPath();
     ctx.arc(pos[0], pos[1], this.r * scale, 0, Math.PI * 2);
@@ -95,7 +104,7 @@ export class Sphere {
           this.vy =
             (this.vy ** 2 +
               (2 / 5) *
-                this.signY *
+                this.signX *
                 this.signOmega *
                 this.r ** 2 *
                 ((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
@@ -106,14 +115,12 @@ export class Sphere {
           this.vy =
             (this.vy ** 2 -
               (2 / 5) *
-                this.signY *
+                this.signX *
                 this.signOmega *
                 this.r ** 2 *
                 ((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
             0.5;
       }
-      console.log(this.vy);
-      console.log((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2);
     }
 
     if (this.y + this.r > this.boxY || this.y - this.r < -this.boxY) {
@@ -124,7 +131,7 @@ export class Sphere {
           this.vx =
             (this.vx ** 2 +
               (2 / 5) *
-                this.signX *
+                this.signY *
                 this.signOmega *
                 this.r ** 2 *
                 ((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
@@ -136,7 +143,7 @@ export class Sphere {
           this.vx =
             (this.vx ** 2 -
               (2 / 5) *
-                this.signX *
+                this.signY *
                 this.signOmega *
                 this.r ** 2 *
                 ((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **

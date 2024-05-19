@@ -15,7 +15,7 @@ export class Controller {
     this.isInput = false;
 
     this.angle = 0;
-    this.accel = 10;
+    this.accel = 8;
     this.angVel = Math.PI * 3;
     this.angAccel = (Math.PI * 3) / 8;
     this.colTime = 0.001;
