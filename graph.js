@@ -33,6 +33,16 @@ export class Graph {
         this.objects[i].reset();
       }
     }
+
+    ctx.beginPath();
+    ctx.moveTo(this.centerX + -45 * this.scale, this.centerY - 22.5 * this.scale);
+    ctx.lineTo(this.centerX + -45 * this.scale, this.centerY - -22.5 * this.scale);
+    ctx.lineTo(this.centerX + 45 * this.scale, this.centerY - -22.5 * this.scale);
+    ctx.lineTo(this.centerX + 45 * this.scale, this.centerY - 22.5 * this.scale);
+    ctx.lineTo(this.centerX + -45 * this.scale, this.centerY - 22.5 * this.scale);
+
+    ctx.lineWidth = '1';
+    ctx.stroke();
   }
 
   coord(coord) {

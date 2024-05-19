@@ -25,7 +25,7 @@ export class Sphere {
 
   input() {
     this.angle = this.data.angle;
-    this.a = this.data.accel / 60 / 60;
+    this.na = this.data.accel / 60 / 60;
     this.nomega = Math.abs(this.data.angVel / 60);
     this.nsignOmega = Math.sign(this.data.angVel);
     this.nalpha = Math.abs(this.data.angAccel / 60 / 60);
@@ -40,6 +40,7 @@ export class Sphere {
     this.signX = Math.sign(Math.cos(this.angle));
     this.signY = Math.sign(Math.sin(this.angle));
     this.v = 80 / 60;
+    this.a = this.na;
     this.vx = Math.abs(this.v * Math.cos(this.angle));
     this.vy = Math.abs(this.v * Math.sin(this.angle));
     this.ax = Math.abs(this.a * Math.cos(this.angle));
@@ -97,7 +98,7 @@ export class Sphere {
                 this.signY *
                 this.signOmega *
                 this.r ** 2 *
-                ((2 * this.omega * this.ay * this.dt) / this.r - ((this.ay * this.dt) / this.r) ** 2)) **
+                ((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
             0.5;
       } else {
         this.x = (this.boxX - this.r) * 2 - this.x;
@@ -108,9 +109,11 @@ export class Sphere {
                 this.signY *
                 this.signOmega *
                 this.r ** 2 *
-                ((2 * this.omega * this.ay * this.dt) / this.r - ((this.ay * this.dt) / this.r) ** 2)) **
+                ((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
             0.5;
       }
+      console.log(this.vy);
+      console.log((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2);
     }
 
     if (this.y + this.r > this.boxY || this.y - this.r < -this.boxY) {
@@ -124,7 +127,7 @@ export class Sphere {
                 this.signX *
                 this.signOmega *
                 this.r ** 2 *
-                ((2 * this.omega * this.ax * this.dt) / this.r - ((this.ax * this.dt) / this.r) ** 2)) **
+                ((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
             0.5;
         }
       } else {
@@ -136,7 +139,7 @@ export class Sphere {
                 this.signX *
                 this.signOmega *
                 this.r ** 2 *
-                ((2 * this.omega * this.ax * this.dt) / this.r - ((this.ax * this.dt) / this.r) ** 2)) **
+                ((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
             0.5;
       }
     }
