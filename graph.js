@@ -6,7 +6,8 @@ export class Graph {
 
     this.objects = [];
 
-    this.objects.push(new Sphere());
+    this.objects.push(new Sphere(0));
+    this.objects.push(new Sphere(1));
   }
 
   resize(width, height) {
@@ -21,8 +22,16 @@ export class Graph {
   }
 
   draw(ctx) {
+    let count = 0;
+
     for (let i = 0; i < this.objects.length; i++) {
       this.objects[i].draw(ctx, this.scale);
+      if (this.objects[i].isFinish) count++;
+    }
+    if (count === this.objects.length) {
+      for (let i = 0; i < this.objects.length; i++) {
+        this.objects[i].reset();
+      }
     }
   }
 
