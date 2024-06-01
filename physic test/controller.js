@@ -19,28 +19,6 @@ export class Controller {
     this.angVel = Math.PI * 3;
     this.angAccel = (Math.PI * 3) / 8;
     this.colTime = 0.001;
-
-    this.rorate = [0, 0]; // xz, yz
-    this.isClick = false;
-    this.pcx = 0;
-    this.pcy = 0;
-
-    window.addEventListener('mousedown', (e) => {
-      this.pcx = e.clientX;
-      this.pcy = e.clientY;
-      this.isClick = true;
-    });
-    window.addEventListener('mousemove', (e) => {
-      if (this.isClick) {
-        this.rorate[0] += (e.clientX - this.pcx) / 300;
-        this.rorate[1] += (e.clientY - this.pcy) / 300;
-        this.pcx = e.clientX;
-        this.pcy = e.clientY;
-      }
-    });
-    window.addEventListener('mouseup', () => {
-      this.isClick = false;
-    });
   }
 
   inputAngle() {

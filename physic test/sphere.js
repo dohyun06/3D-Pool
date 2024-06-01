@@ -37,7 +37,6 @@ export class Sphere {
   reset() {
     this.x = this.index ? -40 : 40;
     this.y = 0;
-    this.z = 0;
     this.px = this.x;
     this.py = this.y;
     this.signX = Math.sign(Math.cos(this.angle));
@@ -58,8 +57,6 @@ export class Sphere {
   }
 
   draw(ctx, scale) {
-    this.rorate = this.data.rorate;
-
     if (this.vx !== 0 && this.vy !== 0) {
       this.ax = Math.abs((this.a * this.vx) / (this.vx ** 2 + this.vy ** 2) ** 0.5);
       this.ay = Math.abs((this.a * this.vy) / (this.vx ** 2 + this.vy ** 2) ** 0.5);
@@ -97,23 +94,7 @@ export class Sphere {
   }
 
   coord(scale) {
-    let x = this.x;
-    let y = this.y;
-    let z = this.z;
-    let tx = 0;
-    let ty = 0;
-    let tz = 0;
-
-    tx = x * Math.cos(this.rorate[0]) - z * Math.sin(this.rorate[0]);
-    tz = x * Math.sin(this.rorate[0]) + z * Math.cos(this.rorate[0]);
-    x = tx;
-    z = tz;
-    ty = y * Math.cos(this.rorate[1]) - z * Math.sin(this.rorate[1]);
-    tz = y * Math.sin(this.rorate[1]) + z * Math.cos(this.rorate[1]);
-    y = ty;
-    z = tz;
-
-    return [this.centerX + x * scale, this.centerY - y * scale];
+    return [this.centerX + this.x * scale, this.centerY - this.y * scale];
   }
 
   boxCollision() {
