@@ -106,7 +106,7 @@ export class Sphere {
     this.y += this.vy * this.signY;
     this.z += this.vz * this.signZ;
 
-    console.log(this.omegax, this.omegay, this.omegaz);
+    console.log(this.omegax * 60, this.omegay * 60, this.omegaz * 60);
 
     this.boxCollision();
 
