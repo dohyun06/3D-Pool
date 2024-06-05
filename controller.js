@@ -1,23 +1,29 @@
 export class Controller {
   constructor() {
-    this.controlAngle = document.querySelector('#angle');
+    this.controlDir = document.querySelector('#dir');
+    this.controlVel = document.querySelector('#vel');
     this.controlAccel = document.querySelector('#accel');
-    this.controlAngVel = document.querySelector('#angVel');
-    this.controlAngAccel = document.querySelector('#angAccel');
+    this.controlrDir = document.querySelector('#rDir');
+    this.controlrVel = document.querySelector('#rVel');
+    this.controlrAccel = document.querySelector('#rAccel');
     this.controlColTime = document.querySelector('#colTime');
 
-    this.controlAngle.addEventListener('change', this.inputAngle.bind(this));
+    this.controlDir.addEventListener('change', this.inputDir.bind(this));
+    this.controlVel.addEventListener('change', this.inputVel.bind(this));
     this.controlAccel.addEventListener('change', this.inputAccel.bind(this));
-    this.controlAngVel.addEventListener('change', this.inputAngVel.bind(this));
-    this.controlAngAccel.addEventListener('change', this.inputAngAccel.bind(this));
+    this.controlrDir.addEventListener('change', this.inputrDir.bind(this));
+    this.controlrVel.addEventListener('change', this.inputrVel.bind(this));
+    this.controlrAccel.addEventListener('change', this.inputrAccel.bind(this));
     this.controlColTime.addEventListener('change', this.inputColTime.bind(this));
 
     this.isInput = false;
 
-    this.angle = 0;
+    this.dir = [1, 0, 0];
+    this.vel = 80;
     this.accel = 8;
-    this.angVel = Math.PI * 3;
-    this.angAccel = (Math.PI * 3) / 8;
+    this.rDir = [0, 0, 1];
+    this.rVel = Math.PI * 3;
+    this.rAccel = (Math.PI * 3) / 8;
     this.colTime = 0.001;
 
     this.rorate = [0, 0]; // xz, yz
@@ -43,8 +49,18 @@ export class Controller {
     });
   }
 
-  inputAngle() {
-    this.angle = parseFloat(this.controlAngle.value);
+  inputDir() {
+    const [dx, dy, dz] = this.controlDir.value
+      .slice(1, -1)
+      .split(',')
+      .map((i) => parseFloat(i));
+    const norm = (dx ** 2 + dy ** 2 + dz ** 2) ** 0.5;
+    this.dir = [dx / norm, dy / norm, dz / norm];
+    this.isInput = true;
+  }
+
+  inputVel() {
+    this.vel = parseFloat(this.controlVel.value);
     this.isInput = true;
   }
 
@@ -53,13 +69,23 @@ export class Controller {
     this.isInput = true;
   }
 
-  inputAngVel() {
-    this.angVel = parseFloat(this.controlAngVel.value);
+  inputrDir() {
+    const [dx, dy, dz] = this.controlrDir.value
+      .slice(1, -1)
+      .split(',')
+      .map((i) => parseFloat(i));
+    const norm = (dx ** 2 + dy ** 2 + dz ** 2) ** 0.5;
+    this.rDir = [dx / norm, dy / norm, dz / norm];
     this.isInput = true;
   }
 
-  inputAngAccel() {
-    this.angAccel = parseFloat(this.controlAngAccel.value);
+  inputrVel() {
+    this.rVel = parseFloat(this.controlrVel.value);
+    this.isInput = true;
+  }
+
+  inputrAccel() {
+    this.rAccel = parseFloat(this.controlrAccel.value);
     this.isInput = true;
   }
 

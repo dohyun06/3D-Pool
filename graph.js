@@ -14,7 +14,7 @@ export class Graph {
 
     this.objects = [];
 
-    this.objects.push(new Sphere(0));
+    // this.objects.push(new Sphere(0));
     this.objects.push(new Sphere(1));
   }
 

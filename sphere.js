@@ -14,6 +14,7 @@ export class Sphere {
 
     this.boxX = 45;
     this.boxY = 22.5;
+    this.boxZ = 22.5;
 
     this.isFinish = false;
   }
@@ -24,12 +25,13 @@ export class Sphere {
   }
 
   input() {
-    this.angle = this.data.angle;
+    this.ndir = this.data.dir;
+    this.nv = this.data.vel / 60;
     this.na = this.data.accel / 60 / 60;
-    this.nomega = Math.abs(this.data.angVel / 60);
-    this.nsignOmega = Math.sign(this.data.angVel);
-    this.nalpha = Math.abs(this.data.angAccel / 60 / 60);
-    this.dt = this.data.colTime;
+    this.nrDir = this.data.rDir;
+    this.nomega = Math.abs(this.data.rVel / 60);
+    this.nalpha = Math.abs(this.data.rAccel / 60 / 60);
+    this.ndt = this.data.colTime;
 
     this.data.isInput = false;
   }
@@ -40,19 +42,37 @@ export class Sphere {
     this.z = 0;
     this.px = this.x;
     this.py = this.y;
-    this.signX = Math.sign(Math.cos(this.angle));
-    this.signX = this.signX ? this.signX : 1;
-    this.signY = Math.sign(Math.sin(this.angle));
-    this.signY = this.signY ? this.signY : 1;
-    this.v = this.index ? 80 / 60 : 0;
+    this.pz = this.z;
+
+    this.dir = this.ndir;
+    this.v = this.index ? this.nv : 0;
+    this.signX = this.dir[0] >= 0 ? 1 : -1;
+    this.signY = this.dir[1] >= 0 ? 1 : -1;
+    this.signZ = this.dir[2] >= 0 ? 1 : -1;
+    this.vx = Math.abs(this.v * this.dir[0]);
+    this.vy = Math.abs(this.v * this.dir[1]);
+    this.vz = Math.abs(this.v * this.dir[2]);
+
     this.a = this.na;
-    this.vx = Math.abs(this.v * Math.cos(this.angle));
-    this.vy = Math.abs(this.v * Math.sin(this.angle));
-    this.ax = Math.abs(this.a * Math.cos(this.angle));
-    this.ay = Math.abs(this.a * Math.sin(this.angle));
+    this.ax = this.a * this.dir[0];
+    this.ay = this.a * this.dir[1];
+    this.az = this.a * this.dir[2];
+
+    this.rDir = this.nrDir;
     this.omega = this.index ? this.nomega : 0;
-    this.signOmega = this.nsignOmega;
+    this.signOmegax = Math.sign(this.rDir[0]);
+    this.signOmegay = Math.sign(this.rDir[1]);
+    this.signOmegaz = Math.sign(this.rDir[2]);
+    this.omegax = Math.abs(this.rDir[0] * this.omega);
+    this.omegay = Math.abs(this.rDir[1] * this.omega);
+    this.omegaz = Math.abs(this.rDir[2] * this.omega);
+
     this.alpha = this.nalpha;
+    this.alphax = Math.abs(this.rDir[0] * this.nalpha);
+    this.alphay = Math.abs(this.rDir[1] * this.nalpha);
+    this.alphaz = Math.abs(this.rDir[2] * this.nalpha);
+
+    this.dt = this.ndt;
 
     this.isFinish = false;
   }
@@ -60,21 +80,22 @@ export class Sphere {
   draw(ctx, scale) {
     this.rorate = this.data.rorate;
 
-    if (this.vx !== 0 && this.vy !== 0) {
-      this.ax = Math.abs((this.a * this.vx) / (this.vx ** 2 + this.vy ** 2) ** 0.5);
-      this.ay = Math.abs((this.a * this.vy) / (this.vx ** 2 + this.vy ** 2) ** 0.5);
-    }
-
     this.vx -= this.ax;
     this.vy -= this.ay;
+    this.vz -= this.az;
 
-    this.omega -= this.alpha;
+    this.omegax -= this.alphax;
+    this.omegay -= this.alphay;
+    this.omegaz -= this.alphaz;
 
     if (this.vx < 0) this.vx = 0;
     if (this.vy < 0) this.vy = 0;
-    if (this.omega < 0) this.omega = 0;
+    if (this.vz < 0) this.vz = 0;
+    if (this.omegax < 0) this.omegax = 0;
+    if (this.omegay < 0) this.omegay = 0;
+    if (this.omegaz < 0) this.omegaz = 0;
 
-    if (this.vx === 0 && this.vy === 0) {
+    if (this.vx === 0 && this.vy === 0 && this.vz === 0) {
       setTimeout(() => (this.isFinish = true), 1000);
     }
 
@@ -125,20 +146,46 @@ export class Sphere {
           (this.vy ** 2 +
             (2 / 5) *
               this.signX *
-              this.signOmega *
+              this.signOmegaz *
               this.r ** 2 *
-              ((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
+              ((2 * this.omegaz * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
           0.5;
+        this.vz =
+          (this.vz ** 2 +
+            (2 / 5) *
+              this.signX *
+              this.signOmegay *
+              this.r ** 2 *
+              ((2 * this.omegay * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
+          0.5;
+
+        const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
+        this.ax = (this.a * this.vx) / norm;
+        this.ay = (this.a * this.vy) / norm;
+        this.az = (this.a * this.vz) / norm;
       } else {
         this.x = (this.boxX - this.r) * 2 - this.x;
         this.vy =
           (this.vy ** 2 -
             (2 / 5) *
               this.signX *
-              this.signOmega *
+              this.signOmegaz *
               this.r ** 2 *
-              ((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
+              ((2 * this.omegaz * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
           0.5;
+        this.vz =
+          (this.vz ** 2 -
+            (2 / 5) *
+              this.signX *
+              this.signOmegay *
+              this.r ** 2 *
+              ((2 * this.omegay * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
+          0.5;
+
+        const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
+        this.ax = (this.a * this.vx) / norm;
+        this.ay = (this.a * this.vy) / norm;
+        this.az = (this.a * this.vz) / norm;
       }
     }
 
@@ -150,20 +197,97 @@ export class Sphere {
           (this.vx ** 2 +
             (2 / 5) *
               this.signY *
-              this.signOmega *
+              this.signOmegaz *
               this.r ** 2 *
-              ((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
+              ((2 * this.omegaz * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
           0.5;
+        this.vz =
+          (this.vz ** 2 +
+            (2 / 5) *
+              this.signY *
+              this.signOmegax *
+              this.r ** 2 *
+              ((2 * this.omegax * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
+          0.5;
+
+        const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
+        this.ax = (this.a * this.vx) / norm;
+        this.ay = (this.a * this.vy) / norm;
+        this.az = (this.a * this.vz) / norm;
       } else {
         this.y = (this.boxY - this.r) * 2 - this.y;
         this.vx =
           (this.vx ** 2 -
             (2 / 5) *
               this.signY *
-              this.signOmega *
+              this.signOmegaz *
               this.r ** 2 *
-              ((2 * this.omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
+              ((2 * this.omegaz * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
           0.5;
+        this.vz =
+          (this.vz ** 2 -
+            (2 / 5) *
+              this.signY *
+              this.signOmegax *
+              this.r ** 2 *
+              ((2 * this.omegax * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
+          0.5;
+
+        const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
+        this.ax = (this.a * this.vx) / norm;
+        this.ay = (this.a * this.vy) / norm;
+        this.az = (this.a * this.vz) / norm;
+      }
+    }
+
+    if (this.z + this.r > this.boxZ || this.z - this.r < -this.boxZ) {
+      this.signZ *= -1;
+      if (this.z - this.r < -this.boxZ) {
+        this.y = (this.r - this.boxY) * 2 - this.y;
+        this.vx =
+          (this.vx ** 2 +
+            (2 / 5) *
+              this.signY *
+              this.signOmegay *
+              this.r ** 2 *
+              ((2 * this.omegay * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
+          0.5;
+        this.vy =
+          (this.vy ** 2 +
+            (2 / 5) *
+              this.signY *
+              this.signOmegax *
+              this.r ** 2 *
+              ((2 * this.omegax * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
+          0.5;
+
+        const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
+        this.ax = (this.a * this.vx) / norm;
+        this.ay = (this.a * this.vy) / norm;
+        this.az = (this.a * this.vz) / norm;
+      } else {
+        this.z = (this.boxZ - this.r) * 2 - this.z;
+        this.vx = this.vx =
+          (this.vx ** 2 -
+            (2 / 5) *
+              this.signY *
+              this.signOmegay *
+              this.r ** 2 *
+              ((2 * this.omegay * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
+          0.5;
+        this.vy =
+          (this.vy ** 2 -
+            (2 / 5) *
+              this.signY *
+              this.signOmegax *
+              this.r ** 2 *
+              ((2 * this.omegax * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
+          0.5;
+
+        const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
+        this.ax = (this.a * this.vx) / norm;
+        this.ay = (this.a * this.vy) / norm;
+        this.az = (this.a * this.vz) / norm;
       }
     }
   }
