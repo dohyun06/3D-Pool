@@ -106,6 +106,8 @@ export class Sphere {
     this.y += this.vy * this.signY;
     this.z += this.vz * this.signZ;
 
+    console.log(this.omegax, this.omegay, this.omegaz);
+
     this.boxCollision();
 
     const pos = this.coord(scale);
