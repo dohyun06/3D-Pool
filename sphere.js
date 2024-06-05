@@ -101,8 +101,10 @@ export class Sphere {
 
     this.px = this.x;
     this.py = this.y;
+    this.pz = this.z;
     this.x += this.vx * this.signX;
     this.y += this.vy * this.signY;
+    this.z += this.vz * this.signZ;
 
     this.boxCollision();
 
