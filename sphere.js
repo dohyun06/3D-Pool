@@ -46,9 +46,9 @@ export class Sphere {
 
     this.dir = this.ndir;
     this.v = this.index ? this.nv : 0;
-    this.signX = this.dir[0] >= 0 ? 1 : -1;
-    this.signY = this.dir[1] >= 0 ? 1 : -1;
-    this.signZ = this.dir[2] >= 0 ? 1 : -1;
+    this.signX = this.dir[0] < 0 ? -1 : 1;
+    this.signY = this.dir[1] < 0 ? -1 : 1;
+    this.signZ = this.dir[2] < 0 ? -1 : 1;
     this.vx = Math.abs(this.v * this.dir[0]);
     this.vy = Math.abs(this.v * this.dir[1]);
     this.vz = Math.abs(this.v * this.dir[2]);
@@ -106,8 +106,6 @@ export class Sphere {
     this.y += this.vy * this.signY;
     this.z += this.vz * this.signZ;
 
-    console.log(this.omegax * 60, this.omegay * 60, this.omegaz * 60);
-
     this.boxCollision();
 
     const pos = this.coord(scale);
@@ -119,6 +117,8 @@ export class Sphere {
     ctx.fill();
 
     if (this.data.isInput) this.input();
+
+    console.log(this.y);
   }
 
   coord(scale) {
@@ -144,155 +144,62 @@ export class Sphere {
   boxCollision() {
     if (this.x + this.r > this.boxX || this.x - this.r < -this.boxX) {
       this.signX *= -1;
-      if (this.x - this.r < -this.boxX) {
-        this.x = (this.r - this.boxX) * 2 - this.x;
-        this.vy =
-          (this.vy ** 2 +
-            (2 / 5) *
-              this.signX *
-              this.signOmegaz *
-              this.r ** 2 *
-              ((2 * this.omegaz * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
-          0.5;
-        this.vz =
-          (this.vz ** 2 +
-            (2 / 5) *
-              this.signX *
-              this.signOmegay *
-              this.r ** 2 *
-              ((2 * this.omegay * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
-          0.5;
+      if (this.x - this.r < -this.boxX) this.x = (this.r - this.boxX) * 2 - this.x;
+      else this.x = (this.boxX - this.r) * 2 - this.x;
 
-        const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
-        this.ax = (this.a * this.vx) / norm;
-        this.ay = (this.a * this.vy) / norm;
-        this.az = (this.a * this.vz) / norm;
-      } else {
-        this.x = (this.boxX - this.r) * 2 - this.x;
-        this.vy =
-          (this.vy ** 2 -
-            (2 / 5) *
-              this.signX *
-              this.signOmegaz *
-              this.r ** 2 *
-              ((2 * this.omegaz * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
-          0.5;
-        this.vz =
-          (this.vz ** 2 -
-            (2 / 5) *
-              this.signX *
-              this.signOmegay *
-              this.r ** 2 *
-              ((2 * this.omegay * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
-          0.5;
+      this.vy = this.calcVelocity(this.vy, this.signX, this.signY, this.omegaz, this.signOmegaz);
+      this.signY *= Math.sign(this.vy);
+      this.vy = Math.abs(this.vy);
 
-        const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
-        this.ax = (this.a * this.vx) / norm;
-        this.ay = (this.a * this.vy) / norm;
-        this.az = (this.a * this.vz) / norm;
-      }
+      this.vz = this.calcVelocity(this.vz, this.signX, this.signZ, this.omegay, this.signOmegay);
+      this.signZ *= Math.sign(this.vz);
+      this.vz = Math.abs(this.vz);
     }
 
     if (this.y + this.r > this.boxY || this.y - this.r < -this.boxY) {
       this.signY *= -1;
-      if (this.y - this.r < -this.boxY) {
-        this.y = (this.r - this.boxY) * 2 - this.y;
-        this.vx =
-          (this.vx ** 2 +
-            (2 / 5) *
-              this.signY *
-              this.signOmegaz *
-              this.r ** 2 *
-              ((2 * this.omegaz * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
-          0.5;
-        this.vz =
-          (this.vz ** 2 +
-            (2 / 5) *
-              this.signY *
-              this.signOmegax *
-              this.r ** 2 *
-              ((2 * this.omegax * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
-          0.5;
+      if (this.y - this.r < -this.boxY) this.y = (this.r - this.boxY) * 2 - this.y;
+      else this.y = (this.boxY - this.r) * 2 - this.y;
 
-        const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
-        this.ax = (this.a * this.vx) / norm;
-        this.ay = (this.a * this.vy) / norm;
-        this.az = (this.a * this.vz) / norm;
-      } else {
-        this.y = (this.boxY - this.r) * 2 - this.y;
-        this.vx =
-          (this.vx ** 2 -
-            (2 / 5) *
-              this.signY *
-              this.signOmegaz *
-              this.r ** 2 *
-              ((2 * this.omegaz * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
-          0.5;
-        this.vz =
-          (this.vz ** 2 -
-            (2 / 5) *
-              this.signY *
-              this.signOmegax *
-              this.r ** 2 *
-              ((2 * this.omegax * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
-          0.5;
+      this.vx = this.calcVelocity(this.vx, this.signY, this.signX, this.omegaz, this.signOmegaz);
+      this.signX *= Math.sign(this.vx);
+      this.vx = Math.abs(this.vx);
 
-        const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
-        this.ax = (this.a * this.vx) / norm;
-        this.ay = (this.a * this.vy) / norm;
-        this.az = (this.a * this.vz) / norm;
-      }
+      this.vz = this.calcVelocity(this.vz, this.signY, this.signZ, this.omegax, this.signOmegax);
+      this.signZ *= Math.sign(this.vz);
+      this.vz = Math.abs(this.vz);
     }
 
     if (this.z + this.r > this.boxZ || this.z - this.r < -this.boxZ) {
       this.signZ *= -1;
-      if (this.z - this.r < -this.boxZ) {
-        this.y = (this.r - this.boxY) * 2 - this.y;
-        this.vx =
-          (this.vx ** 2 +
-            (2 / 5) *
-              this.signY *
-              this.signOmegay *
-              this.r ** 2 *
-              ((2 * this.omegay * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
-          0.5;
-        this.vy =
-          (this.vy ** 2 +
-            (2 / 5) *
-              this.signY *
-              this.signOmegax *
-              this.r ** 2 *
-              ((2 * this.omegax * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
-          0.5;
+      if (this.z - this.r < -this.boxZ) this.y = (this.r - this.boxY) * 2 - this.y;
+      else this.z = (this.boxZ - this.r) * 2 - this.z;
 
-        const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
-        this.ax = (this.a * this.vx) / norm;
-        this.ay = (this.a * this.vy) / norm;
-        this.az = (this.a * this.vz) / norm;
-      } else {
-        this.z = (this.boxZ - this.r) * 2 - this.z;
-        this.vx = this.vx =
-          (this.vx ** 2 -
-            (2 / 5) *
-              this.signY *
-              this.signOmegay *
-              this.r ** 2 *
-              ((2 * this.omegay * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
-          0.5;
-        this.vy =
-          (this.vy ** 2 -
-            (2 / 5) *
-              this.signY *
-              this.signOmegax *
-              this.r ** 2 *
-              ((2 * this.omegax * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2)) **
-          0.5;
+      this.vx = this.calcVelocity(this.vx, this.signZ, this.signX, this.omegay, this.signOmegay);
+      this.signX *= Math.sign(this.vx);
+      this.vx = Math.abs(this.vx);
 
-        const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
-        this.ax = (this.a * this.vx) / norm;
-        this.ay = (this.a * this.vy) / norm;
-        this.az = (this.a * this.vz) / norm;
-      }
+      this.vy = this.calcVelocity(this.vy, this.signZ, this.signY, this.omegax, this.signOmegax);
+      this.signY *= Math.sign(this.vy);
+      this.vy = Math.abs(this.vy);
     }
+
+    const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
+    this.ax = (this.a * this.vx) / norm;
+    this.ay = (this.a * this.vy) / norm;
+    this.az = (this.a * this.vz) / norm;
+  }
+
+  calcVelocity(v, signV1, signV2, omega, signOmega) {
+    const tv =
+      v ** 2 -
+      signV1 *
+        signV2 *
+        signOmega *
+        (2 / 5) *
+        this.r ** 2 *
+        ((2 * omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2);
+
+    return Math.sign(tv) * Math.abs(tv) ** 0.5;
   }
 }

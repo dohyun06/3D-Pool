@@ -19,12 +19,12 @@ export class Controller {
     this.isInput = false;
 
     this.dir = [1, 0, 0];
-    this.vel = 80;
-    this.accel = 8;
+    this.vel = 100;
+    this.accel = 10;
     this.rDir = [0, 0, 1];
-    this.rVel = Math.PI * 3;
-    this.rAccel = (Math.PI * 3) / 8;
-    this.colTime = 0.001;
+    this.rVel = Math.PI * 10;
+    this.rAccel = (Math.PI * 10) / 5;
+    this.colTime = 0.01;
 
     this.rorate = [0, 0]; // xz, yz
     this.isClick = false;
