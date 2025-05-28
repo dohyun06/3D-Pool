@@ -60,9 +60,9 @@ export class Sphere {
 
     this.rDir = this.nrDir;
     this.omega = this.index ? this.nomega : 0;
-    this.signOmegax = Math.sign(this.rDir[0]);
-    this.signOmegay = Math.sign(this.rDir[1]);
-    this.signOmegaz = Math.sign(this.rDir[2]);
+    this.signOmegax = this.rDir[0] < 0 ? -1 : 1;
+    this.signOmegay = this.rDir[1] < 0 ? -1 : 1;
+    this.signOmegaz = this.rDir[2] < 0 ? -1 : 1;
     this.omegax = Math.abs(this.rDir[0] * this.omega);
     this.omegay = Math.abs(this.rDir[1] * this.omega);
     this.omegaz = Math.abs(this.rDir[2] * this.omega);
@@ -79,6 +79,7 @@ export class Sphere {
 
   draw(ctx, scale) {
     this.rorate = this.data.rorate;
+    if (!this.index) console.log(this.ax);
 
     this.vx -= this.ax;
     this.vy -= this.ay;
@@ -117,8 +118,6 @@ export class Sphere {
     ctx.fill();
 
     if (this.data.isInput) this.input();
-
-    console.log(this.y);
   }
 
   coord(scale) {
@@ -147,13 +146,17 @@ export class Sphere {
       if (this.x - this.r < -this.boxX) this.x = (this.r - this.boxX) * 2 - this.x;
       else this.x = (this.boxX - this.r) * 2 - this.x;
 
-      this.vy = this.calcVelocity(this.vy, this.signX, this.signY, this.omegaz, this.signOmegaz);
+      [this.omegaz, this.vy] = this.calcVelocity(this.vy, this.signX, this.signY, this.omegaz, this.signOmegaz);
       this.signY *= Math.sign(this.vy);
       this.vy = Math.abs(this.vy);
+      this.signOmegaz *= Math.sign(this.omegaz);
+      this.omegaz = Math.abs(this.omegaz);
 
-      this.vz = this.calcVelocity(this.vz, this.signX, this.signZ, this.omegay, this.signOmegay);
+      [this.omegay, this.vz] = this.calcVelocity(this.vz, this.signX, this.signZ, this.omegay, this.signOmegay);
       this.signZ *= Math.sign(this.vz);
       this.vz = Math.abs(this.vz);
+      this.signOmegay *= Math.sign(this.omegay);
+      this.omegay = Math.abs(this.omegay);
     }
 
     if (this.y + this.r > this.boxY || this.y - this.r < -this.boxY) {
@@ -161,13 +164,17 @@ export class Sphere {
       if (this.y - this.r < -this.boxY) this.y = (this.r - this.boxY) * 2 - this.y;
       else this.y = (this.boxY - this.r) * 2 - this.y;
 
-      this.vx = this.calcVelocity(this.vx, this.signY, this.signX, this.omegaz, this.signOmegaz);
+      [this.omegaz, this.vx] = this.calcVelocity(this.vx, this.signY, this.signX, this.omegaz, this.signOmegaz);
       this.signX *= Math.sign(this.vx);
       this.vx = Math.abs(this.vx);
+      this.signOmegaz *= Math.sign(this.omegaz);
+      this.omegaz = Math.abs(this.omegaz);
 
-      this.vz = this.calcVelocity(this.vz, this.signY, this.signZ, this.omegax, this.signOmegax);
+      [this.omegax, this.vz] = this.calcVelocity(this.vz, this.signY, this.signZ, this.omegax, this.signOmegax);
       this.signZ *= Math.sign(this.vz);
       this.vz = Math.abs(this.vz);
+      this.signOmegax *= Math.sign(this.omegax);
+      this.omegax = Math.abs(this.omegax);
     }
 
     if (this.z + this.r > this.boxZ || this.z - this.r < -this.boxZ) {
@@ -175,22 +182,34 @@ export class Sphere {
       if (this.z - this.r < -this.boxZ) this.y = (this.r - this.boxY) * 2 - this.y;
       else this.z = (this.boxZ - this.r) * 2 - this.z;
 
-      this.vx = this.calcVelocity(this.vx, this.signZ, this.signX, this.omegay, this.signOmegay);
+      [this.omegay, this.vx] = this.calcVelocity(this.vx, this.signZ, this.signX, this.omegay, this.signOmegay);
       this.signX *= Math.sign(this.vx);
       this.vx = Math.abs(this.vx);
+      this.signOmegay *= Math.sign(this.omegay);
+      this.omegay = Math.abs(this.omegay);
 
-      this.vy = this.calcVelocity(this.vy, this.signZ, this.signY, this.omegax, this.signOmegax);
+      [this.omegax, this.vy] = this.calcVelocity(this.vy, this.signZ, this.signY, this.omegax, this.signOmegax);
       this.signY *= Math.sign(this.vy);
       this.vy = Math.abs(this.vy);
+      this.signOmegax *= Math.sign(this.omegax);
+      this.omegax = Math.abs(this.omegax);
     }
 
     const norm = (this.vx ** 2 + this.vy ** 2 + this.vz ** 2) ** 0.5;
-    this.ax = (this.a * this.vx) / norm;
-    this.ay = (this.a * this.vy) / norm;
-    this.az = (this.a * this.vz) / norm;
+    this.ax = this.vx ? (this.a * this.vx) / norm : 0;
+    this.ay = this.vy ? (this.a * this.vy) / norm : 0;
+    this.az = this.vz ? (this.a * this.vz) / norm : 0;
+
+    const rnorm = (this.omegax ** 2 + this.omegay ** 2 + this.omegaz ** 2) ** 0.5;
+    if (rnorm) {
+      this.alphax = this.omegax ? (this.alpha * this.omegax) / rnorm : 0;
+      this.alphay = this.omegay ? (this.alpha * this.omegay) / rnorm : 0;
+      this.alphaz = this.omegaz ? (this.alpha * this.omegaz) / rnorm : 0;
+    }
   }
 
   calcVelocity(v, signV1, signV2, omega, signOmega) {
+    const tomega = omega - (this.a * this.dt) / this.r;
     const tv =
       v ** 2 -
       signV1 *
@@ -200,6 +219,6 @@ export class Sphere {
         this.r ** 2 *
         ((2 * omega * this.a * this.dt) / this.r - ((this.a * this.dt) / this.r) ** 2);
 
-    return Math.sign(tv) * Math.abs(tv) ** 0.5;
+    return [tomega, Math.sign(tv) * Math.abs(tv) ** 0.5];
   }
 }

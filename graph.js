@@ -3,9 +3,9 @@ import { Controller } from './controller.js';
 
 export class Graph {
   constructor() {
-    this.controller = new Controller();
+    this.ctrl = new Controller();
 
-    this.rorate = this.controller.rorate;
+    this.rorate = this.ctrl.rorate;
 
     this.r = 1;
     this.d = this.r * 2;
@@ -14,7 +14,7 @@ export class Graph {
 
     this.objects = [];
 
-    // this.objects.push(new Sphere(0));
+    this.objects.push(new Sphere(0));
     this.objects.push(new Sphere(1));
   }
 
@@ -30,7 +30,7 @@ export class Graph {
   }
 
   draw(ctx) {
-    this.rorate = this.controller.rorate;
+    this.rorate = this.ctrl.rorate;
     let count = 0;
 
     for (let i = 0; i < this.objects.length; i++) {
